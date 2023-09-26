@@ -9,7 +9,7 @@ let promises = [];
 
 async function downloadVideo(videoType, videoId) {
   const dirPath = join("videos", videoId);
-  if (!existsSync(dirPath)) mkdirSync(dirPath);
+  if (!existsSync(dirPath)) mkdirSync(dirPath, { recursive: true });
 
   if (videoType === "youtube") {
     const filePath = join(dirPath, "0.webm");

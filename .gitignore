@@ -1,6 +1,3 @@
 node_modules/
 videos/
 config.json
-main.db*
-voice_rank_*.png
-invite_rank_*.png

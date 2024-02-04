@@ -1,0 +1,42 @@
+{
+  "name": "music_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node index.js",
+    "deploy": "node deploy.js",
+    "start": "pm2 start index.js --name \"music_bot\"",
+    "stop": "pm2 stop music_bot"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.16.1",
+    "bufferutil": "^4.0.8",
+    "csv-parse": "^5.5.3",
+    "discord-api-types": "^0.37.67",
+    "discord.js": "^14.14.1",
+    "node-schedule": "^2.1.1",
+    "sodium-native": "^4.0.4",
+    "spottydl": "^0.2.5",
+    "toad-scheduler": "^3.0.0",
+    "utf-8-validate": "^6.0.3",
+    "ytdl-core": "npm:@distube/ytdl-core@^4.13.3",
+    "ytpl": "^2.3.0",
+    "zlib-sync": "^0.1.9"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1"
+  },
+  "overrides": {
+    "spottydl": {
+      "ytdl-core": "$ytdl-core"
+    }
+  }
+}

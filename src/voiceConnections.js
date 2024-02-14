@@ -24,7 +24,19 @@ async function preparePlayback(session) {
   session.currentVideo = info;
 
   session.player.play(resource);
-  panelPromise.then(() => session.panelMsg.edit(buildPanel(session)));
+  panelPromise.then(async () => {
+    const channel = session.panelMsg.channel;
+    const newerMsgs = await channel.messages.fetch({
+      after: session.panelMsg.id,
+      limit: 3,
+    });
+    if (newerMsgs.size >= 3) {
+      await session.panelMsg.delete();
+      session.panelMsg = await channel.send(buildPanel(session));
+    } else {
+      await session.panelMsg.edit(buildPanel(session));
+    }
+  });
 
   const task = new AsyncTask("progressBar", () =>
     session.panelMsg.edit(buildPanel(session))

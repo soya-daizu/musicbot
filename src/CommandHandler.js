@@ -1,5 +1,3 @@
-import botConfig from "./botConfig.js";
-
 import join from "./commands/join.js";
 import makeJoinBtn from "./commands/makeJoinBtn.js";
 import leave from "./commands/leave.js";
@@ -12,6 +10,7 @@ import skip from "./commands/skip.js";
 import repeat from "./commands/repeat.js";
 import repeatQueue from "./commands/repeatQueue.js";
 import shuffle from "./commands/shuffle.js";
+import volume from "./commands/volume.js";
 import _import from "./commands/import.js";
 import _export from "./commands/export.js";
 
@@ -50,6 +49,7 @@ export default class CommandHandler {
     repeat,
     repeatQueue,
     shuffle,
+    volume,
     _import,
     _export,
   ];

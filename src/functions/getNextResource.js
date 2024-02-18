@@ -72,7 +72,7 @@ export default async function getNextResource(session) {
     inlineVolume: true,
     inputType: StreamType.WebmOpus,
   });
-  resource.volume.setVolume(0.05);
+  resource.volume.setVolumeLogarithmic(session.volume);
 
   return [resource, info];
 }

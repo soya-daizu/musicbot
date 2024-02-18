@@ -21,6 +21,7 @@ async function preparePlayback(session) {
 
   const [resource, info] = (await getNextResource(session)) || [];
   if (!resource || !info) return;
+  session.resource = resource;
   session.currentVideo = info;
 
   session.player.play(resource);
@@ -68,7 +69,9 @@ export function createVoiceConnection(channel, panelMsg) {
     panelMsg,
     connection,
     player,
+    resource: undefined,
     paused: false,
+    volume: 1.0,
     currentVideo: undefined,
     queue: [],
     queueRepeat: {

@@ -49,7 +49,7 @@ export default function buildPanel(session) {
 ${playbackSymbol}\`[${progressBar}](${progressStr}/${lengthStr})\``
       )
       .setThumbnail(thumbnail);
-  } else if (session.queue.length) {
+  } else if (session?.queue.length) {
     embed.setDescription("準備中");
   } else {
     embed.setDescription("なし");

@@ -8,9 +8,7 @@ import {
 import formatTime from "./formatTime.js";
 
 export default function buildPanel(session) {
-  const embed = new EmbedBuilder()
-    .setTitle("🎵現在再生中")
-    .setDescription("なし");
+  const embed = new EmbedBuilder().setTitle("🎵現在再生中");
 
   if (session) {
     let nextItemStr = "なし";
@@ -51,6 +49,10 @@ export default function buildPanel(session) {
 ${playbackSymbol}\`[${progressBar}](${progressStr}/${lengthStr})\``
       )
       .setThumbnail(thumbnail);
+  } else if (session.queue.length) {
+    embed.setDescription("準備中");
+  } else {
+    embed.setDescription("なし");
   }
 
   return {

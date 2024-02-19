@@ -3,6 +3,7 @@ import {
   StreamType,
   VoiceConnectionStatus,
 } from "@discordjs/voice";
+import "@discordjs/opus";
 import { createReadStream, existsSync, readdirSync } from "fs";
 import { join } from "path";
 

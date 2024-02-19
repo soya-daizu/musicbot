@@ -1,7 +1,9 @@
 import { SlashCommandBuilder } from "discord.js";
 
+import botConfig, { writeCurrentConfig } from "../botConfig.js";
 import { CommandError } from "../CommandHandler.js";
 import { getMusicSession } from "../voiceConnections.js";
+
 import autoDeleteReply from "../functions/autoDeleteReply.js";
 
 export default {
@@ -25,6 +27,8 @@ export default {
     const newVolume = interaction.options.getInteger("volume");
     session.volume = newVolume / 100;
     session.resource.volume.setVolumeLogarithmic(session.volume);
+    botConfig.volume = session.volume;
+    writeCurrentConfig();
 
     await interaction.reply({
       content: `:white_check_mark: 再生音量を${newVolume}%に設定しました`,

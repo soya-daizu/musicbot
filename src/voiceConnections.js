@@ -7,6 +7,8 @@ import {
 } from "@discordjs/voice";
 import { ToadScheduler, AsyncTask, SimpleIntervalJob } from "toad-scheduler";
 
+import botConfig from "./botConfig.js";
+
 import getNextResource from "./functions/getNextResource.js";
 import buildPanel from "./functions/buildPanel.js";
 
@@ -71,7 +73,7 @@ export function createVoiceConnection(channel, panelMsg) {
     player,
     resource: undefined,
     paused: false,
-    volume: 1.0,
+    volume: botConfig.volume ?? 1.0,
     currentVideo: undefined,
     queue: [],
     queueRepeat: {

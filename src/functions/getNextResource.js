@@ -3,7 +3,7 @@ import {
   StreamType,
   VoiceConnectionStatus,
 } from "@discordjs/voice";
-import "@discordjs/opus";
+import {} from "@discordjs/opus"; // Preload to prevent delay on initial playback
 import { createReadStream, existsSync, readdirSync } from "fs";
 import { join } from "path";
 

@@ -1,6 +1,11 @@
-import ytdl from "ytdl-core";
-import ytpl from "ytpl";
-import SpottyDL from "spottydl";
+import ytdl from "@distube/ytdl-core";
+import ytpl from "@distube/ytpl";
+import YTMusic from "ytmusic-api";
+import { Spotifly } from "spotifly";
+
+const ytmusic = new YTMusic.default();
+await ytmusic.initialize();
+const sp = new Spotifly();
 
 const spotifyRegex =
   /^https:\/\/open\.spotify\.com\/(.+\/)*(track|album|playlist)\/([a-zA-Z0-9]+).*$/;
@@ -16,45 +21,12 @@ export default async function resolveUrl(url) {
   } else if ((spotifyResult = spotifyRegex.exec(url)) !== null) {
     const [, , type, id] = spotifyResult;
 
-    const properUrl = `https://open.spotify.com/${type}/${id}`;
     if (type === "track") {
-      const track = await SpottyDL.getTrack(properUrl);
-      items.push([
-        track.id,
-        {
-          url: properUrl,
-          title: track.title,
-          artist: track.artist,
-          thumbnail: track.albumCoverURL,
-        },
-      ]);
+      items.push(await resolveSpotifyTrack(type, id));
     } else if (type === "album") {
-      const album = await SpottyDL.getAlbum(properUrl);
-      items.push(
-        ...album.tracks.map((track) => [
-          track.id,
-          {
-            url: properUrl,
-            // 本来はtitleに楽曲名が格納されているはずだが、何故かnameに格納されている
-            title: track.title || track.name,
-            artist: album.artist,
-            thumbnail: album.albumCoverURL,
-          },
-        ])
-      );
+      items.push(...(await resolveSpotifyAlbum(type, id)));
     } else if (type === "playlist") {
-      const playlist = await SpottyDL.getPlaylist(properUrl);
-      items.push(
-        ...playlist.tracks.map((track) => [
-          track.id,
-          {
-            url: properUrl,
-            title: track.title,
-            artist: track.artist,
-            thumbnail: track.albumCoverURL,
-          },
-        ])
-      );
+      items.push(...(await resolveSpotifyPlaylist(type, id)));
     } else return;
   }
 
@@ -62,6 +34,79 @@ export default async function resolveUrl(url) {
     items.map(([videoId, overrideParams]) => getInfo(videoId, overrideParams))
   );
   return infos.filter(Boolean);
+}
+
+function makeProperUrl(type, id) {
+  return `https://open.spotify.com/${type}/${id}`;
+}
+
+async function resolveSpotifyTrack(type, id) {
+  const track = await sp.getTrack(id);
+  const trackInfo = {
+    url: makeProperUrl(type, id),
+    title: track.data.trackUnion.name,
+    artist: track.data.trackUnion.artistsWithRoles.items
+      .map((i) => i.artist.profile.name)
+      .join(", "),
+    thumbnail: track.data.trackUnion.albumOfTrack.coverArt.sources[0].url,
+  };
+  const searchResult = await ytmusic.searchSongs(
+    `${trackInfo.title} - ${trackInfo.artist}`
+  );
+
+  return [searchResult[0].videoId, trackInfo];
+}
+
+async function resolveSpotifyAlbum(type, id) {
+  const album = await sp.getAlbum(id);
+  const albumInfo = {
+    url: makeProperUrl(type, id),
+    title: album.data.albumUnion.name,
+    artist: album.data.albumUnion.artists.items
+      .map((i) => i.profile.name)
+      .join(", "),
+    thumbnail: album.data.albumUnion.coverArt.sources[0].url,
+  };
+  const searchResult = await ytmusic.searchAlbums(
+    `${albumInfo.title} - ${albumInfo.artist}`
+  );
+  const playlist = await ytpl(searchResult[0].playlistId);
+
+  const items = await Promise.all(
+    album.data.albumUnion.tracks.items.map(async ({ track }, i) => {
+      const trackInfo = {
+        url: makeProperUrl(type, id),
+        title: track.name,
+        artist: track.artists.items.map((i) => i.profile.name).join(", "),
+        thumbnail: album.data.albumUnion.coverArt.sources[0].url,
+      };
+
+      return [playlist.items[i].id, trackInfo];
+    })
+  );
+
+  return items;
+}
+
+async function resolveSpotifyPlaylist(type, id) {
+  const playlist = await sp.getPlaylist(id);
+  const items = await Promise.all(
+    playlist.data.playlistV2.content.items.map(async (item) => {
+      const trackInfo = {
+        url: makeProperUrl(type, id),
+        title: item.data.name,
+        artist: item.data.artists.items.map((i) => i.profile.name).join(", "),
+        thumbnail: item.data.albumOfTrack.coverArt.sources[0].url,
+      };
+      const searchResult = await ytmusic.searchSongs(
+        `${trackInfo.title} - ${trackInfo.artist}`
+      );
+
+      return [searchResult[0].videoId, trackInfo];
+    })
+  );
+
+  return items;
 }
 
 async function getInfo(videoId, overrideParams) {

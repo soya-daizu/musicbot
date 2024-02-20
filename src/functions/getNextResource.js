@@ -13,7 +13,7 @@ async function waitForSupply(session) {
   session.awaitingSupply = true;
 
   let counter = 0;
-  while (session.queue.length === 0) {
+  while (session.queue.length === 0 || session.queue[0].incomplete) {
     if (counter >= 180) return false;
     if (session.connection.state.status === VoiceConnectionStatus.Destroyed)
       return;
@@ -29,7 +29,7 @@ async function waitForSupply(session) {
 export default async function getNextResource(session) {
   const { queue, queueRepeat } = session;
 
-  if (queue.length === 0) {
+  if (queue.length === 0 || queue[0].incomplete) {
     if (session.awaitingSupply) return;
 
     const result = await waitForSupply(session);

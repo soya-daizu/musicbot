@@ -43,6 +43,7 @@ export default async function resolveUrl(url) {
           artist: "",
           length: 0,
           thumbnail: undefined,
+          incomplete: true,
         },
       ]);
   }

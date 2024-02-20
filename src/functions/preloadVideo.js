@@ -58,12 +58,12 @@ async function downloadArbitrary(info) {
     artist: metadata.common.artist ?? "不明なアーティスト",
     length: metadata.format.duration * 1000,
     thumbnail: undefined,
+    incomplete: undefined,
   };
 
   const thumbnail = metadata.common.picture?.find(
     (p) => p.format === "image/jpeg" || p.format === "image/png"
   );
-  console.log(metadata.common.picture);
   if (thumbnail) {
     const extension = thumbnail.format.split("/")[1];
     const thumbnailPath = join(dirPath, `thumbnail.${extension}`);

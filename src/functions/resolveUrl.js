@@ -29,10 +29,29 @@ export default async function resolveUrl(url) {
     } else if (type === "playlist") {
       items.push(...(await resolveSpotifyPlaylist(id)));
     } else return;
+  } else {
+    const hash = hashCode(url);
+    const urlObj = new URL(url);
+    if (/\.(mp3|ogg|webm|opus|wav|flac)$/.test(urlObj.pathname))
+      items.push([
+        "",
+        {
+          videoId: `__${hash}`,
+          url,
+          sourceUrl: url,
+          title: urlObj.pathname.split("/").at(-1),
+          artist: "",
+          length: 0,
+          thumbnail: undefined,
+        },
+      ]);
   }
 
   const infos = await Promise.all(
-    items.map(([videoId, overrideParams]) => getInfo(videoId, overrideParams))
+    items.map(([id, overrideParams]) => {
+      if (id === "") return overrideParams;
+      return fillWithYTInfo(id, overrideParams);
+    })
   );
   return infos.filter(Boolean);
 }
@@ -111,22 +130,34 @@ async function resolveSpotifyPlaylist(id) {
   return items;
 }
 
-async function getInfo(videoId, overrideParams) {
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0, len = str.length; i < len; i++) {
+    let chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash.toString();
+}
+
+async function fillWithYTInfo(videoId, overrideParams) {
   // Remove undefined fields
   Object.keys(overrideParams).forEach(
     (key) => overrideParams[key] === undefined && delete overrideParams[key]
   );
 
-  const info = await ytdl.getInfo(videoId).catch(() => null);
-  if (!info) return;
-  return {
-    videoId,
-    url: info.videoDetails["video_url"],
-    sourceUrl: info.videoDetails["video_url"],
-    title: info.videoDetails.title,
-    artist: info.videoDetails.author.name,
-    length: info.videoDetails.lengthSeconds * 1000,
-    thumbnail: info.videoDetails.thumbnails[0]?.url,
-    ...overrideParams,
-  };
+  if (videoId) {
+    const info = await ytdl.getInfo(videoId).catch(() => null);
+    if (!info) return;
+    return {
+      videoId,
+      url: info.videoDetails["video_url"],
+      sourceUrl: info.videoDetails["video_url"],
+      title: info.videoDetails.title,
+      artist: info.videoDetails.author.name,
+      length: info.videoDetails.lengthSeconds * 1000,
+      thumbnail: info.videoDetails.thumbnails[0]?.url,
+      ...overrideParams,
+    };
+  }
 }

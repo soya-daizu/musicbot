@@ -56,8 +56,11 @@ export default {
       );
 
     session.queue.push(...infos);
-    infos.reduce(
-      (promise, info) => promise.then(() => preloadVideo(info)),
+    session.queue.reduce(
+      (promise, info, idx) =>
+        promise.then(async () => {
+          session.queue[idx] = await preloadVideo(info);
+        }),
       Promise.resolve()
     );
 

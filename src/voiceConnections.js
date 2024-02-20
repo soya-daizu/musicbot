@@ -1,3 +1,4 @@
+import { EmbedBuilder } from "discord.js";
 import {
   joinVoiceChannel,
   createAudioPlayer,
@@ -10,7 +11,7 @@ import { ToadScheduler, AsyncTask, SimpleIntervalJob } from "toad-scheduler";
 import botConfig from "./botConfig.js";
 
 import getNextResource from "./functions/getNextResource.js";
-import buildPanel from "./functions/buildPanel.js";
+import buildPanel, { fillCurrentVideo } from "./functions/buildPanel.js";
 
 const sessions = new Map();
 const scheduler = new ToadScheduler();
@@ -41,9 +42,14 @@ async function preparePlayback(session) {
     }
   });
 
-  const task = new AsyncTask("progressBar", () =>
-    session.panelMsg.edit(buildPanel(session))
-  );
+  const task = new AsyncTask("progressBar", async () => {
+    session.panelMsg = await session.panelMsg.fetch();
+    const embed = new EmbedBuilder(session.panelMsg.embeds[0]);
+    fillCurrentVideo(embed, session);
+    await session.panelMsg.edit({
+      embeds: [embed],
+    });
+  });
   session.recurrenceJob = new SimpleIntervalJob(
     { milliseconds: Math.max(session.currentVideo.length / 20, 10 * 1000) },
     task,

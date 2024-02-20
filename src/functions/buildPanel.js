@@ -3,52 +3,67 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  AttachmentBuilder,
 } from "discord.js";
 
 import formatTime from "./formatTime.js";
 
+function fillFields(embed, session) {
+  let nextItemStr = "なし";
+  if (session.queueRepeat.enabled && session.queue.length) {
+    if (session.queueRepeat.shuffle) nextItemStr = "シャッフル中";
+    else {
+      const nextItem =
+        session.queue[(session.queueRepeat.index + 1) % session.queue.length];
+      nextItemStr = nextItem.title;
+    }
+  } else if (session.queue.length) nextItemStr = session.queue[0].title;
+
+  const queueLengthStr = formatTime(
+    session.queue.reduce((total, info) => total + info.length, 0)
+  );
+  embed.setFields(
+    { name: "次の曲", value: nextItemStr, inline: true },
+    {
+      name: "再生待ち",
+      value: `${session.queue.length}曲(${queueLengthStr})`,
+      inline: true,
+    }
+  );
+}
+
+export function fillCurrentVideo(embed, session, files) {
+  const progress = session.player.state.resource.playbackDuration;
+  const { title, artist, url, thumbnail, length } = session.currentVideo;
+
+  const playbackSymbol = session.paused ? "⏸" : "▶";
+  const progressBar = "="
+    .repeat(Math.round((progress / length) * 20))
+    .padEnd(20, "-");
+
+  const progressStr = formatTime(progress);
+  const lengthStr = formatTime(length);
+  embed.setDescription(
+    `## [${title} - ${artist}](${url})
+${playbackSymbol}\`[${progressBar}](${progressStr}/${lengthStr})\``
+  );
+
+  if (thumbnail?.startsWith("http")) embed.setThumbnail(thumbnail);
+  else if (thumbnail) {
+    if (files)
+      files.push(new AttachmentBuilder(thumbnail, { name: "thumbnail.png" }));
+    embed.setThumbnail("attachment://thumbnail.png");
+  }
+}
+
 export default function buildPanel(session) {
   const embed = new EmbedBuilder().setTitle("🎵現在再生中");
 
-  if (session) {
-    let nextItemStr = "なし";
-    if (session.queueRepeat.enabled && session.queue.length) {
-      if (session.queueRepeat.shuffle) nextItemStr = "シャッフル中";
-      else {
-        const nextItem =
-          session.queue[(session.queueRepeat.index + 1) % session.queue.length];
-        nextItemStr = nextItem.title;
-      }
-    } else if (session.queue.length) nextItemStr = session.queue[0].title;
+  if (session) fillFields(embed, session);
 
-    const queueLengthStr = formatTime(
-      session.queue.reduce((total, info) => total + info.length, 0)
-    );
-    embed.setFields(
-      { name: "次の曲", value: nextItemStr, inline: true },
-      {
-        name: "再生待ち",
-        value: `${session.queue.length}曲(${queueLengthStr})`,
-        inline: true,
-      }
-    );
-  }
-
+  const files = [];
   if (session?.currentVideo) {
-    const progress = session.player.state.resource.playbackDuration;
-    const { title, artist, url, thumbnail, length } = session.currentVideo;
-    const playbackSymbol = session.paused ? "⏸" : "▶";
-    const progressBar = "="
-      .repeat(Math.round((progress / length) * 20))
-      .padEnd(20, "-");
-    const progressStr = formatTime(progress);
-    const lengthStr = formatTime(length);
-    embed
-      .setDescription(
-        `## [${title} - ${artist}](${url})
-${playbackSymbol}\`[${progressBar}](${progressStr}/${lengthStr})\``
-      )
-      .setThumbnail(thumbnail);
+    fillCurrentVideo(embed, session, files);
   } else if (session?.queue.length) {
     embed.setDescription("準備中");
   } else {
@@ -57,6 +72,7 @@ ${playbackSymbol}\`[${progressBar}](${progressStr}/${lengthStr})\``
 
   return {
     embeds: [embed],
+    files,
     components: [
       new ActionRowBuilder().setComponents(
         new ButtonBuilder()

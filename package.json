@@ -23,6 +23,8 @@
     "csv-parse": "^5.5.3",
     "discord-api-types": "^0.37.67",
     "discord.js": "^14.14.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "music-metadata": "^7.14.0",
     "node-schedule": "^2.1.1",
     "sodium-native": "^4.0.4",
     "spotifly": "^0.1.1",

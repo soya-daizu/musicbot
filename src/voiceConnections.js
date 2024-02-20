@@ -79,7 +79,7 @@ export function createVoiceConnection(channel, panelMsg) {
     player,
     resource: undefined,
     paused: false,
-    volume: botConfig.volume ?? 1.0,
+    volume: botConfig.volumeSettings?.[channel.guild.id] ?? 1.0,
     currentVideo: undefined,
     queue: [],
     queueRepeat: {

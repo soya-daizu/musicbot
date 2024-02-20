@@ -27,7 +27,10 @@ export default {
     const newVolume = interaction.options.getInteger("volume");
     session.volume = newVolume / 100;
     session.resource.volume.setVolumeLogarithmic(session.volume);
-    botConfig.volume = session.volume;
+    botConfig.volumeSettings = {
+      ...botConfig.volumeSettings,
+      [interaction.guild.id]: session.volume,
+    };
     writeCurrentConfig();
 
     await interaction.reply({

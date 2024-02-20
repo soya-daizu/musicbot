@@ -91,7 +91,7 @@ async function resolveSpotifyAlbum(type, id) {
 async function resolveSpotifyPlaylist(type, id) {
   const playlist = await sp.getPlaylist(id);
   const items = await Promise.all(
-    playlist.data.playlistV2.content.items.map(async (item) => {
+    playlist.data.playlistV2.content.items.map(async ({ item }) => {
       const trackInfo = {
         url: makeProperUrl(type, id),
         title: item.data.name,

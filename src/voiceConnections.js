@@ -11,7 +11,10 @@ import { ToadScheduler, AsyncTask, SimpleIntervalJob } from "toad-scheduler";
 import botConfig from "./botConfig.js";
 
 import getNextResource from "./functions/getNextResource.js";
-import buildPanel, { fillCurrentVideo } from "./functions/buildPanel.js";
+import buildPanel, {
+  fillCurrentVideo,
+  fillFields,
+} from "./functions/buildPanel.js";
 
 const sessions = new Map();
 const scheduler = new ToadScheduler();
@@ -45,6 +48,7 @@ async function preparePlayback(session) {
   const task = new AsyncTask("progressBar", async () => {
     session.panelMsg = await session.panelMsg.fetch();
     const embed = new EmbedBuilder(session.panelMsg.embeds[0]);
+    fillFields(embed, session);
     fillCurrentVideo(embed, session);
     await session.panelMsg.edit({
       embeds: [embed],

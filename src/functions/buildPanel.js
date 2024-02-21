@@ -8,7 +8,7 @@ import {
 
 import formatTime from "./formatTime.js";
 
-function fillFields(embed, session) {
+export function fillFields(embed, session) {
   let nextItemStr = "なし";
   if (session.queueRepeat.enabled && session.queue.length) {
     if (session.queueRepeat.shuffle) nextItemStr = "シャッフル中";

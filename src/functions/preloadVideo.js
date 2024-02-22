@@ -4,7 +4,6 @@ import ffmpeg from "fluent-ffmpeg";
 import {
   existsSync,
   mkdirSync,
-  readdirSync,
   readFileSync,
   writeFileSync,
   renameSync,
@@ -33,6 +32,10 @@ async function downloadYouTubeVideo(info) {
   }).pipe(createWriteStream(filePath));
   await once(stream, "finish");
 
+  const metadata = await mm.parseFile(filePath);
+  info.length = metadata.format.duration * 1000;
+  info.cached = undefined;
+
   writeFileSync(join(dirPath, "info.json"), JSON.stringify(info, null, 2));
   renameSync(filePath, destFilePath);
 
@@ -58,7 +61,7 @@ async function downloadArbitrary(info) {
     artist: metadata.common.artist ?? "不明なアーティスト",
     length: metadata.format.duration * 1000,
     thumbnail: undefined,
-    incomplete: undefined,
+    cached: undefined,
   };
 
   const thumbnail = metadata.common.picture?.find(
@@ -92,12 +95,16 @@ async function downloadArbitrary(info) {
 }
 
 export function preloadVideo(info) {
+  if (info.cached) return info;
+
   const videoId = info.videoId;
-  const dirPath = join("videos", videoId);
-  if (existsSync(dirPath)) {
-    const cached = readdirSync(dirPath).some((f) => f === "audio.webm");
-    const info = JSON.parse(readFileSync(join(dirPath, "info.json")));
-    if (cached) return info;
+  const cached =
+    existsSync(join("videos", videoId, "info.json")) &&
+    existsSync(join("videos", videoId, "audio.webm"));
+  if (cached) {
+    const info = JSON.parse(readFileSync(join("videos", videoId, "info.json")));
+    info.cached = true;
+    return info;
   }
 
   let promise;

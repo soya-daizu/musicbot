@@ -6,7 +6,7 @@ import { getMusicSession } from "../voiceConnections.js";
 import resolveUrl from "../functions/resolveUrl.js";
 import { preloadVideo } from "../functions/preloadVideo.js";
 import autoDeleteReply from "../functions/autoDeleteReply.js";
-import buildPanel from "../functions/buildPanel.js";
+import { updatePanel } from "../functions/buildPanel.js";
 import truncateLines from "../functions/truncateLines.js";
 
 export default {
@@ -91,6 +91,6 @@ ${infoLines.join("\n")}
     });
     autoDeleteReply(interaction);
 
-    await session.panelMsg.edit(buildPanel(session));
+    await updatePanel(session, ["currentVideo", "fields", "buttons"]);
   },
 };

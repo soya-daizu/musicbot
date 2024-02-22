@@ -4,7 +4,7 @@ import { CommandError } from "../CommandHandler.js";
 import { getMusicSession } from "../voiceConnections.js";
 
 import autoDeleteReply from "../functions/autoDeleteReply.js";
-import buildPanel from "../functions/buildPanel.js";
+import { updatePanel } from "../functions/buildPanel.js";
 
 export default {
   data: new SlashCommandBuilder()
@@ -34,6 +34,6 @@ export default {
     }
     autoDeleteReply(interaction);
 
-    await session.panelMsg.edit(buildPanel(session));
+    await updatePanel(session, ["currentVideo", "fields", "buttons"]);
   },
 };

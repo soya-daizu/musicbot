@@ -4,6 +4,7 @@ import { CommandError } from "../CommandHandler.js";
 import { getMusicSession } from "../voiceConnections.js";
 
 import autoDeleteReply from "../functions/autoDeleteReply.js";
+import { updatePanel } from "../functions/buildPanel.js";
 
 export default {
   data: new SlashCommandBuilder()
@@ -28,5 +29,7 @@ export default {
         content: `:white_check_mark: 再生待ちリストをクリアしました`,
       });
     autoDeleteReply(interaction);
+
+    await updatePanel(session, ["currentVideo", "fields", "buttons"]);
   },
 };

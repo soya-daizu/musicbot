@@ -10,9 +10,9 @@ import skip from "./commands/skip.js";
 import repeat from "./commands/repeat.js";
 import repeatQueue from "./commands/repeatQueue.js";
 import shuffle from "./commands/shuffle.js";
-import volume from "./commands/volume.js";
 import _import from "./commands/import.js";
 import _export from "./commands/export.js";
+import set from "./commands/set.js";
 
 import joinButton from "./actions/joinButton.js";
 import startOverButton from "./actions/startOverButton.js";
@@ -27,6 +27,10 @@ import clearButton from "./actions/clearButton.js";
 import clearConfirmButton from "./actions/clearConfirmButton.js";
 import leaveButton from "./actions/leaveButton.js";
 import leaveConfirmButton from "./actions/leaveConfirmButton.js";
+import settingsButton from "./actions/settingsButton.js";
+import setVolumeButton from "./actions/setVolumeButton.js";
+import setBitrateSelectMenu from "./actions/setBitrateSelectMenu.js";
+import closeDialogButton from "./actions/closeDialogButton.js";
 
 export class CommandError extends Error {
   constructor(message) {
@@ -49,9 +53,9 @@ export default class CommandHandler {
     repeat,
     repeatQueue,
     shuffle,
-    volume,
     _import,
     _export,
+    set,
   ];
   static actions = [
     joinButton,
@@ -67,6 +71,10 @@ export default class CommandHandler {
     clearConfirmButton,
     leaveButton,
     leaveConfirmButton,
+    settingsButton,
+    setVolumeButton,
+    setBitrateSelectMenu,
+    closeDialogButton,
   ];
   static ignoreList = [
     "voiceRankExcludeButton",
@@ -75,6 +83,8 @@ export default class CommandHandler {
     "inviteRankExcludeButton",
     "inviteRankExcludeRemoveButton",
     "inviteRankResetButton",
+    "settingsButtonVolume",
+    "settingsButtonBitrate",
   ];
 
   constructor() {}

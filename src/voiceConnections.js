@@ -1,4 +1,3 @@
-import { EmbedBuilder } from "discord.js";
 import {
   joinVoiceChannel,
   createAudioPlayer,
@@ -11,10 +10,8 @@ import { ToadScheduler, AsyncTask, SimpleIntervalJob } from "toad-scheduler";
 import botConfig from "./botConfig.js";
 
 import getNextResource from "./functions/getNextResource.js";
-import buildPanel, {
-  fillCurrentVideo,
-  fillFields,
-} from "./functions/buildPanel.js";
+import buildPanel from "./functions/buildPanel.js";
+import { updatePanel } from "./functions/buildPanel.js";
 
 const sessions = new Map();
 const scheduler = new ToadScheduler();
@@ -23,11 +20,10 @@ async function preparePlayback(session) {
   scheduler.removeById(session.channelId);
   session.recurrenceJob = undefined;
   session.currentVideo = undefined;
-  const panelPromise = session.panelMsg.edit(buildPanel(session));
+  const panelPromise = updatePanel(session);
 
   const [resource, info] = (await getNextResource(session)) || [];
   if (!resource || !info) return;
-  session.resource = resource;
   session.currentVideo = info;
 
   session.player.play(resource);
@@ -41,19 +37,13 @@ async function preparePlayback(session) {
       await session.panelMsg.delete();
       session.panelMsg = await channel.send(buildPanel(session));
     } else {
-      await session.panelMsg.edit(buildPanel(session));
+      await updatePanel(session);
     }
   });
 
-  const task = new AsyncTask("progressBar", async () => {
-    session.panelMsg = await session.panelMsg.fetch();
-    const embed = new EmbedBuilder(session.panelMsg.embeds[0]);
-    fillFields(embed, session);
-    fillCurrentVideo(embed, session);
-    await session.panelMsg.edit({
-      embeds: [embed],
-    });
-  });
+  const task = new AsyncTask("progressBar", () =>
+    updatePanel(session, ["currentVideo", "fields"])
+  );
   session.recurrenceJob = new SimpleIntervalJob(
     { milliseconds: Math.max(session.currentVideo.length / 20, 10 * 1000) },
     task,
@@ -81,9 +71,9 @@ export function createVoiceConnection(channel, panelMsg) {
     panelMsg,
     connection,
     player,
-    resource: undefined,
     paused: false,
     volume: botConfig.volumeSettings?.[channel.guild.id] ?? 1.0,
+    bitrate: 64000,
     currentVideo: undefined,
     queue: [],
     queueRepeat: {

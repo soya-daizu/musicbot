@@ -93,7 +93,6 @@ ${infoLines.join("\n")}
         content,
       });
       autoDeleteReply(interaction);
-      await session.panelMsg.edit(buildPanel(session));
       await updatePanel(session, ["currentVideo", "fields", "buttons"]);
     }
   },

@@ -94,7 +94,6 @@ async function resolveSpotifyTrackData(spotifyTrack) {
       let score = 1.0 - Math.abs(lengthDiff / spotifyTrack.length);
       if (spotifyTrack.title === ytmSong.name) score *= 2;
       if (spotifyTrack.artist === ytmSong.artist.name) score *= 2;
-      console.log(ytmSong.name, score);
 
       if (best.score < score) return { score, ytmSong };
       return best;

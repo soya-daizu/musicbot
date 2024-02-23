@@ -10,7 +10,7 @@ import { updatePanel } from "../../functions/buildPanel.js";
 export default {
   data: new SlashCommandSubcommandBuilder()
     .setName("volume")
-    .setDescription("再生音量を設定します (デフォルト: 20%)")
+    .setDescription("再生音量を設定します")
     .addIntegerOption((option) =>
       option
         .setName("volume")

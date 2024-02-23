@@ -9,6 +9,8 @@ import {
 import formatTime from "./formatTime.js";
 
 export function fillFields(embed, session) {
+  if (!session) return;
+
   let nextItemStr = "なし";
   if (session.queueRepeat.enabled && session.queue.length) {
     if (session.queueRepeat.shuffle) nextItemStr = "シャッフル中";
@@ -43,7 +45,16 @@ export function fillFields(embed, session) {
 }
 
 export function fillCurrentVideo(embed, session, files) {
-  const progress = session.player.state.resource.playbackDuration ?? 0;
+  if (!session?.currentVideo?.length) {
+    if (session?.queue.length) {
+      embed.setDescription("準備中");
+    } else {
+      embed.setDescription("なし");
+    }
+    return;
+  }
+
+  const progress = session.player.state.resource?.playbackDuration ?? 0;
   const { title, artist, url, thumbnail, length } = session.currentVideo;
 
   const playbackSymbol = session.paused ? "⏸" : "▶";
@@ -169,16 +180,10 @@ export function buildButtons3(session) {
 export default function buildPanel(session) {
   const embed = new EmbedBuilder().setTitle("🎵現在再生中");
 
-  if (session) fillFields(embed, session);
+  fillFields(embed, session);
 
   const files = [];
-  if (session?.currentVideo?.length) {
-    fillCurrentVideo(embed, session, files);
-  } else if (session?.queue.length) {
-    embed.setDescription("準備中");
-  } else {
-    embed.setDescription("なし");
-  }
+  fillCurrentVideo(embed, session, files);
 
   return {
     embeds: [embed],

@@ -14,7 +14,10 @@ export default {
       );
 
     const delta = Number(interaction.customId.split("#")[1]);
-    session.volume = parseFloat((session.volume + delta / 100).toFixed(1));
+    session.volume = parseFloat((session.volume + delta / 100).toFixed(2));
+    if (session.volume < 0) session.volume = 0;
+    else if (session.volume > 2) session.volume = 2;
+
     if (session.currentVideo)
       session.player.state.resource.volume.setVolumeLogarithmic(session.volume);
 

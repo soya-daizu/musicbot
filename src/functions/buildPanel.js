@@ -43,7 +43,7 @@ export function fillFields(embed, session) {
 }
 
 export function fillCurrentVideo(embed, session, files) {
-  const progress = session.player.state.resource.playbackDuration;
+  const progress = session.player.state.resource.playbackDuration ?? 0;
   const { title, artist, url, thumbnail, length } = session.currentVideo;
 
   const playbackSymbol = session.paused ? "⏸" : "▶";

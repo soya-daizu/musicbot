@@ -1,5 +1,5 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
-import { mkdirSync, existsSync } from "fs";
+import { mkdirSync, } from "fs";
 
 import botConfig, { writeCurrentConfig } from "./src/botConfig.js";
 import CommandHandler from "./src/CommandHandler.js";
@@ -7,7 +7,6 @@ import CommandHandler from "./src/CommandHandler.js";
 import deployCommands from "./src/functions/deployCommands.js";
 import pruneVideos from "./src/functions/pruneVideos.js";
 
-import restoreMusicSessions from "./src/functions/restoreMusicSessions.js";
 import startHttpServer from "./keepAlive.js";
 
 const client = new Client({
@@ -23,7 +22,6 @@ client.on(Events.InteractionCreate, commandHandler.handleCommand);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[起動完了] ${c.user.tag}`);
-  startHttpServer();
 
   pruneVideos();
 
@@ -37,7 +35,7 @@ client.once(Events.ClientReady, async (c) => {
       }
   });
 
-  if (existsSync("./sessions.json")) restoreMusicSessions(c);
+  startHttpServer();
 });
 
 client.once(Events.GuildCreate, async (guild) => {

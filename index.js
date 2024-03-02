@@ -8,6 +8,7 @@ import deployCommands from "./src/functions/deployCommands.js";
 import pruneVideos from "./src/functions/pruneVideos.js";
 
 import restoreMusicSessions from "./src/functions/restoreMusicSessions.js";
+import startServer from "./keepAlive.js";
 
 const client = new Client({
   intents: [
@@ -22,6 +23,7 @@ client.on(Events.InteractionCreate, commandHandler.handleCommand);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[起動完了] ${c.user.tag}`);
+  startServer();
 
   pruneVideos();
 
@@ -54,9 +56,5 @@ client.once(Events.GuildDelete, (guild) => {
   writeCurrentConfig();
 });
 
-function start() {
-  mkdirSync("videos", { recursive: true });
-  client.login(botConfig.token);
-}
-
-export default { start };
+mkdirSync("videos", { recursive: true });
+client.login(botConfig.token);

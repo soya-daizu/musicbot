@@ -1,4 +1,4 @@
 node_modules/
 videos/
-config.json
+*_config.json
 main.db*

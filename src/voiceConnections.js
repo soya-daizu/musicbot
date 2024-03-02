@@ -12,6 +12,7 @@ import botConfig from "./botConfig.js";
 import getNextResource from "./functions/getNextResource.js";
 import buildPanel from "./functions/buildPanel.js";
 import { updatePanel } from "./functions/buildPanel.js";
+import recordMusicSessions from "./functions/recordMusicSessions.js";
 
 const sessions = new Map();
 const scheduler = new ToadScheduler();
@@ -39,6 +40,7 @@ async function preparePlayback(session) {
     } else {
       await updatePanel(session);
     }
+    recordMusicSessions();
   });
 
   const task = new AsyncTask("progressBar", () =>
@@ -62,11 +64,12 @@ export function createVoiceConnection(channel, panelMsg) {
   });
   const player = createAudioPlayer({
     behaviors: {
-      noSubscriber: NoSubscriberBehavior.Pause,
+      noSubscriber: NoSubscriberBehavior.Play,
     },
   });
   connection.subscribe(player);
   const session = {
+    guildId: channel.guild.id,
     channelId: channel.id,
     panelMsg,
     connection,
@@ -86,10 +89,30 @@ export function createVoiceConnection(channel, panelMsg) {
   };
   sessions.set(channel.guild.id, session);
 
-  connection.on(VoiceConnectionStatus.Ready, () => {
+  connection.on(VoiceConnectionStatus.Ready, (_, newState) => {
+    const connectionChannelId =
+      newState.subscription?.connection.joinConfig.channelId;
+    const channelMoved = connectionChannelId !== session.channelId;
+    if (channelMoved) {
+      session.channelId = connectionChannelId;
+      return;
+    }
+
     console.log(`Voice connection ready: ${channel.guild.id} ${new Date()}`);
     preparePlayback(session);
     channel.client.user.setActivity(`${channel.name}で音楽`);
+  });
+  connection.on(VoiceConnectionStatus.Disconnected, async () => {
+    try {
+      await Promise.race([
+        entersState(connection, VoiceConnectionStatus.Signalling, 5000),
+        entersState(connection, VoiceConnectionStatus.Connecting, 5000),
+      ]);
+      // Seems to be reconnecting to a new channel - ignore disconnect
+    } catch (error) {
+      // Seems to be a real disconnect which SHOULDN'T be recovered from
+      connection.destroy();
+    }
   });
   connection.on(VoiceConnectionStatus.Destroyed, () => {
     console.log(
@@ -99,14 +122,25 @@ export function createVoiceConnection(channel, panelMsg) {
     session.panelMsg.delete();
     sessions.delete(channel.guild.id);
     channel.client.user.setActivity("");
+    recordMusicSessions();
   });
   player.on(AudioPlayerStatus.Idle, () => {
     preparePlayback(session);
   });
+  player.on("stateChange", (oldState, newState) => {
+    console.log(`player stateChange: ${oldState.status} -> ${newState.status}`);
+  });
+  connection.on("stateChange", (oldState, newState) => {
+    console.log(`connection stateChange: ${oldState.status} -> ${newState.status}`);
+  })
 
   return session;
 }
 
 export function getMusicSession(guildId) {
   return sessions.get(guildId);
+}
+
+export function getAllMusicSessions() {
+  return [...sessions.values()];
 }

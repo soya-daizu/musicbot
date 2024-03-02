@@ -1,15 +1,17 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
+import { mkdirSync, existsSync } from "fs";
 
 import botConfig, { writeCurrentConfig } from "./src/botConfig.js";
 import CommandHandler from "./src/CommandHandler.js";
 
 import deployCommands from "./src/functions/deployCommands.js";
-import handleVoiceStateUpdate from "./src/functions/handleVoiceStateUpdate.js";
+import pruneVideos from "./src/functions/pruneVideos.js";
+
+import restoreMusicSessions from "./src/functions/restoreMusicSessions.js";
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildVoiceStates,
   ],
 });
@@ -17,10 +19,23 @@ const client = new Client({
 const commandHandler = new CommandHandler();
 client.commands = commandHandler.commandCollection;
 client.on(Events.InteractionCreate, commandHandler.handleCommand);
-client.on(Events.VoiceStateUpdate, handleVoiceStateUpdate);
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`[起動完了] ${c.user.tag}`);
+
+  pruneVideos();
+
+  await c.guilds.fetch().then(async (guilds) => {
+    for (const guild of guilds.values())
+      if (!botConfig.guildIds.includes(guild.id)) {
+        console.log(`[サーバー追加] ${guild.name}`);
+        await deployCommands([guild.id]);
+        botConfig.guildIds.push(guild.id);
+        writeCurrentConfig();
+      }
+  });
+
+  if (existsSync("./sessions.json")) restoreMusicSessions(c);
 });
 
 client.once(Events.GuildCreate, async (guild) => {
@@ -39,4 +54,9 @@ client.once(Events.GuildDelete, (guild) => {
   writeCurrentConfig();
 });
 
-client.login(botConfig.token);
+function start() {
+  mkdirSync("videos", { recursive: true });
+  client.login(botConfig.token);
+}
+
+export default { start };

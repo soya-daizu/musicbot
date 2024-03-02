@@ -6,6 +6,7 @@ import { preloadVideo } from "../functions/preloadVideo.js";
 import autoDeleteReply from "../functions/autoDeleteReply.js";
 import { updatePanel } from "../functions/buildPanel.js";
 import truncateLines from "../functions/truncateLines.js";
+import recordMusicSessions from "../functions/recordMusicSessions.js";
 
 export default {
   data: { name: "addModal" },
@@ -26,10 +27,7 @@ export default {
 
     session.queue.push(...infos);
     session.queue.reduce(
-      (promise, info, idx) =>
-        promise.then(async () => {
-          session.queue[idx] = await preloadVideo(info);
-        }),
+      (promise, info) => promise.then(() => preloadVideo(info)),
       Promise.resolve()
     );
 
@@ -61,5 +59,7 @@ ${infoLines.join("\n")}
     autoDeleteReply(interaction);
 
     await updatePanel(session, ["currentVideo", "fields", "buttons"]);
+
+    recordMusicSessions();
   },
 };

@@ -20,22 +20,11 @@
     "@distube/ytdl-core": "^4.13.3",
     "@distube/ytpl": "^1.2.1",
     "better-sqlite3": "^9.4.3",
-    "bufferutil": "^4.0.8",
-    "csv-parse": "^5.5.3",
-    "discord-api-types": "^0.37.67",
     "discord.js": "^14.14.1",
-    "fluent-ffmpeg": "^2.1.2",
-    "music-metadata": "^7.14.0",
     "node-schedule": "^2.1.1",
-    "sodium-native": "^4.0.4",
+    "sodium-native": "^4.0.10",
     "spotifly": "^0.1.1",
-    "toad-scheduler": "^3.0.0",
-    "utf-8-validate": "^6.0.3",
-    "ytmusic-api": "^5.2.1",
-    "zlib-sync": "^0.1.9"
-  },
-  "devDependencies": {
-    "eslint": "^8.56.0",
-    "prettier": "^3.1.1"
+    "toad-scheduler": "^3.0.1",
+    "ytmusic-api": "^5.2.1"
   }
 }

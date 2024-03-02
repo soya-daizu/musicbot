@@ -32,18 +32,6 @@ export default async function resolveUrl(url) {
     } else if (type === "playlist") {
       items.push(...(await resolveSpotifyPlaylist(id)));
     } else return;
-  } else {
-    const hash = hashCode(url);
-    const urlObj = new URL(url);
-    if (/\.(mp3|aac|ogg|webm|opus|wav|flac)$/.test(urlObj.pathname))
-      items.push({
-        videoId: `__${hash}`,
-        url,
-        title: urlObj.pathname.split("/").at(-1),
-        artist: "",
-        length: 0,
-        thumbnail: undefined,
-      });
   }
 
   const infos = await Promise.all(items);
@@ -229,14 +217,4 @@ async function resolveSpotifyPlaylist(id) {
   );
 
   return items;
-}
-
-function hashCode(str) {
-  let hash = 0;
-  for (let i = 0, len = str.length; i < len; i++) {
-    let chr = str.charCodeAt(i);
-    hash = (hash << 5) - hash + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash.toString();
 }

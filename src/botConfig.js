@@ -1,9 +1,9 @@
-import { readFileSync, writeFileSync } from "fs";
-
-const botConfig = JSON.parse(readFileSync("./smusic_bot_config.json"));
+const botConfig = {
+  clientId: process.env.CLIENT_ID || "",
+  token: process.env.TOKEN || "",
+  guildIds: [],
+}
 
 export default botConfig;
 
-export function writeCurrentConfig() {
-  writeFileSync("./smusic_bot_config.json", JSON.stringify(botConfig, null, 2));
-}
+export function writeCurrentConfig() {}

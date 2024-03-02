@@ -1,11 +1,10 @@
-import express from "express";
+import http from "http";
 
-const app = express();
-
-app.get("/", (_req, res) => {
-  res.send("I'm alive!");
-})
-
-export default function startServer() {
-  app.listen(process.env.PORT || 3000);
+export default function startHttpServer() {
+  http
+    .createServer(function(req, res) {
+      res.write("I'm alive");
+      res.end();
+    })
+    .listen(process.env.PORT || 3000);
 }
